@@ -8,10 +8,10 @@ import com.pengrad.telegrambot.response.SendResponse;
 public class TelegramController {
     public void startTelegramBot() {
         // Ersetze "BOT_TOKEN" mit deinem eigenen Bot-Token
-        TelegramBot bot = new TelegramBot("6271390408:AAGs95Q60ji8j-DQ4pvVLPRk3VywP_CC0M");
+        TelegramBot bot = new TelegramBot("6252910635:AAHM7UnJybeZPdRLiIOYbUZzTIG8C_eS8Cc");
 
         // Ersetze "CHAT_ID" mit der Chat-ID deines Handys
-        long chatId = 5009754090L;
+        long chatId = 6122009233L;
         Object chatIdObj = Long.valueOf(chatId);
 
         // Sende die Nachricht an die angegebene Chat-ID

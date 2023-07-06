@@ -1,25 +1,22 @@
-#include <Arduino.h>
-#include "HCSR04.h"
+#include <HCSR04.h>
 
-float getDistance();
+byte triggerPin = 13;
+byte echoPin = 14;
 
-UltraSonicDistanceSensor distanceSensor(33, 32);  // Initialize sensor that uses digital pins 13 and 12.
-
-void setup() {
+void setup () {
   Serial.begin(9600);
+  HCSR04.begin(triggerPin, echoPin);
 }
 
-void loop() {
-
-getDistance();
-}
-
-float getDistance() {
-  double distance = distanceSensor.measureDistanceCm();
-
-  Serial.print(F("°C - Distance: "));
-  Serial.print(distance);
-  Serial.println(F("cm"));
-  delay(1000);
-  return 0;
+void loop () {
+  float temperature = 15;
+  
+  double* distances = HCSR04.measureDistanceCm(temperature);
+  
+  Serial.print("1: ");
+  Serial.print(distances[0]);
+  Serial.println(" cm");
+  
+  Serial.println("---");
+  delay(250);
 }

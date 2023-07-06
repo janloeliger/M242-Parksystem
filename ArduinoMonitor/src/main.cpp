@@ -1,25 +1,18 @@
 #include <Arduino.h>
-#include "HCSR04.h"
 
-float getDistance();
-
-UltraSonicDistanceSensor distanceSensor(13, 12);  // Initialize sensor that uses digital pins 13 and 12.
+// put function declarations here:
+int myFunction(int, int);
 
 void setup() {
-  Serial.begin(9600);
+  // put your setup code here, to run once:
+  int result = myFunction(2, 3);
 }
 
 void loop() {
-
-getDistance();
+  // put your main code here, to run repeatedly:
 }
 
-float getDistance() {
-  double distance = distanceSensor.measureDistanceCm();
-
-  Serial.print(F("°C - Distance: "));
-  Serial.print(distance);
-  Serial.println(F("cm"));
-  delay(1000);
-  return 0;
+// put function definitions here:
+int myFunction(int x, int y) {
+  return x + y;
 }
