@@ -78,6 +78,7 @@ void checkGateStatus() {
 }
 
 void receiveData(int byteCount) {
+  Serial.print("receives data");
   if (Wire.available() >= sizeof(int)) {
     int parkingCount = Wire.read();
     writeDisplay(parkingCount);
