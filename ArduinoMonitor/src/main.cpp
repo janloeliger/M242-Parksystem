@@ -11,9 +11,11 @@ void writeDisplay(int n);
 // constants
 const int SERVO_MAX_POS = 120;
 const int SERVO_MIN_POS = 45;
+const int SERVO_SPECIAL_MAX_POS = 90;
+const int SERVO_SPECIAL_MIN_POS = 10;
 const int MASTER_ADDRESS = 1;
 const int ARDUINO_ADDRESS = 3;
-const int CHECK_INTERVAL = 5000;
+const int SERVO_INTERVAL = 10000;
 
 // Pins
 const int SERVO_ENTRY_PIN = 11;
@@ -39,11 +41,11 @@ void setup() {
   // inits servos
   servoEntry.attach(SERVO_ENTRY_PIN);
   servoExit.attach(SERVO_EXIT_PIN);
-  //servoEntry.write(SERVO_MIN_POS);
-  servoExit.write(SERVO_MIN_POS);
+  servoEntry.write(SERVO_MIN_POS);
+  servoExit.write(SERVO_SPECIAL_MIN_POS);
   // sets buttons
-  pinMode(BUTTON_ENTRY_PIN, INPUT);
-  pinMode(BUTTON_EXIT_PIN, INPUT);
+  pinMode(BUTTON_ENTRY_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_EXIT_PIN, INPUT_PULLUP);
   // inits i2c
   Wire.begin(ARDUINO_ADDRESS);
   Wire.onReceive(receiveData);
@@ -58,28 +60,34 @@ void checkGateStatus() {
   unsigned long currentMillis = millis();
   // checks entry gate
   if (digitalRead(BUTTON_ENTRY_PIN) == LOW && entryIsOpen == false) {
-    servoEntry.write(SERVO_MAX_POS);
+    Serial.println("Gate is open, entry");
+    servoEntry.write(SERVO_MIN_POS);
     entryCheckTime = currentMillis;
     entryIsOpen = true;
-  } else if (currentMillis - entryCheckTime >= CHECK_INTERVAL && entryIsOpen == true) {
-    servoEntry.write(SERVO_MIN_POS);
+  } 
+  if (currentMillis - entryCheckTime >= SERVO_INTERVAL && entryIsOpen == true) {
+    Serial.println("Gate is clsoed, entry");
+    servoEntry.write(SERVO_MAX_POS);
     entryIsOpen = false;
   }
 
   // checks exit gate
-    if (digitalRead(BUTTON_EXIT_PIN) == LOW && exitIsOpen == false) {
-    servoExit.write(SERVO_MAX_POS);
+  if (digitalRead(BUTTON_EXIT_PIN) == LOW && exitIsOpen == false) {
+    Serial.println("Gate is open, exit");
+    servoExit.write(SERVO_SPECIAL_MAX_POS);
     exitCheckTime = currentMillis;
     exitIsOpen = true;
-  } else if (currentMillis - exitCheckTime >= CHECK_INTERVAL && exitIsOpen == true) {
-    servoExit.write(SERVO_MIN_POS);
+  } 
+  if (currentMillis - exitCheckTime >= SERVO_INTERVAL && exitIsOpen == true) {
+    Serial.println("Gate is clsoed, exit");
+    servoExit.write(SERVO_SPECIAL_MIN_POS);
     exitIsOpen = false;
   }
 }
 
 void receiveData(int byteCount) {
   Serial.print("receives data");
-  if (Wire.available() >= sizeof(int)) {
+  if (Wire.read() == 0) {
     int parkingCount = Wire.read();
     writeDisplay(parkingCount);
   }
