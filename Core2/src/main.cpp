@@ -22,7 +22,7 @@ const int TRIGGER_PIN = 13;
 const int ECHO_PIN = 14;
 
 unsigned long previousCheckTime = 0;
-u_int8_t reservedParkCount;
+int reservedParkCount = 0;
 
 void setup()
 {
@@ -34,7 +34,7 @@ void setup()
   // sets the i2c display at starup
   Wire.beginTransmission(ARDUINO_MONITOR_ADDRESS);
   Wire.write(highByte(0));
-  Wire.write(lowByte(PARKING_COUNT - reservedParkCount));
+  Wire.write(lowByte(PARKING_COUNT));
   Wire.endTransmission();
 }
 
@@ -50,11 +50,11 @@ void loop()
 
     // measures with the I2C sensor
     bool isRightParked = 0;
-    Wire.requestFrom(2, 1);
+    /*Wire.requestFrom(2, 1);
     while (Wire.available())
     {                      // peripheral may send less than requested
       isRightParked = isParked(Wire.read()); // receive a byte as character
-    }
+    }*/
     // measures with the attached sensor
     double *distances = HCSR04.measureDistanceCm();
     bool isLeftParked = isParked(distances[0]);
