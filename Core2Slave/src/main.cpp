@@ -15,6 +15,9 @@ const int ECHO_PIN = 14;
 
 
 void setup() {
+  //inits m5
+    M5.begin();
+    M5.Lcd.clear();
   // inits i2c
   Wire.begin(ARDUINO_ADDRESS);
   Wire.onRequest(requestDistance);

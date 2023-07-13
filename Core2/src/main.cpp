@@ -29,6 +29,9 @@ const int MQTT_PORT = 1883;
 const int TRIGGER_PIN = 13;
 const int ECHO_PIN = 14;
 
+bool isLeftParked = false;
+bool isRightParked = false;
+
 unsigned long previousCheckTime = 0;
 int reservedParkCount = 0;
 
@@ -61,34 +64,40 @@ void setup()
 void loop()
 {
   // checks if MQTT is connected
+    client.loop();
     if (!client.connected()) {
-    connectToMqtt();
+      connectToWifi();
+      connectToMqtt();
   }
   
   unsigned long currentMillis = millis();
   int oldParkedCount = reservedParkCount;
+  bool oldLeftParked = isLeftParked;
+  bool oldRightParked = isRightParked;
 
   // Checking Task
   if (currentMillis - previousCheckTime >= CHECK_INTERVAL)
   {
     previousCheckTime = currentMillis;
-
+    /*
     // measures with the I2C sensor
-    bool isRightParked = 0;
-    /*Wire.requestFrom(2, 1);
+    Wire.requestFrom(2, 1);
     while (Wire.available())
     {                      // peripheral may send less than requested
       isRightParked = isParked(Wire.read()); // receive a byte as character
     }*/
+
     // measures with the attached sensor
     double *distances = HCSR04.measureDistanceCm();
-    bool isLeftParked = isParked(distances[0]);
+    isLeftParked = isParked(distances[0]);
+
     // sets the parked car count
     reservedParkCount = isLeftParked + isRightParked;
     // Drawing Task
     drawDisplay(isLeftParked, isRightParked);
   }
 
+    // Sets the I2C-Display
   if (reservedParkCount != oldParkedCount)
   {
     Serial.println("send data");
@@ -96,6 +105,35 @@ void loop()
     Wire.write(highByte(0));
     Wire.write(lowByte(PARKING_COUNT - reservedParkCount));
     Wire.endTransmission();
+  }
+
+  // sends mqtt status
+  if (oldLeftParked != isLeftParked)
+  {
+    Serial.println("send data to mqtt");
+    if(oldLeftParked == true) {
+      client.subscribe("parking/links");
+      client.publish("parking/links", "frei");
+    }
+    if(oldLeftParked == false) {
+      client.subscribe("parking/links");
+      client.publish("parking/links", "besetzt");
+    }
+  }
+
+  // sends mqtt status
+  if (oldRightParked != isRightParked)
+  {
+    Serial.println("send data to mqtt");
+    if(oldRightParked == true) {
+      client.subscribe("parking/rechts");
+      client.publish("parking/rechts", "frei");
+    }
+    if(oldRightParked == false) {
+      client.subscribe("parking/rechts");
+      client.publish("parking/rechts", "besetzt");
+
+    }
   }
 }
 
@@ -118,7 +156,7 @@ void drawDisplay(int leftFreeParkingCount, int rightFreeParkingCount)
 
 bool isParked(int distance)
 {
-  if (distance <= 8)
+  if (distance <= 4)
   {
     return true;
   }
@@ -145,5 +183,4 @@ void connectToMqtt() {
     delay(1000);
 
   }
-  client.subscribe("/parking");
 }
