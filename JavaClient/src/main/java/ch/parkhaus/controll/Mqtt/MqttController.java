@@ -1,30 +1,41 @@
 package ch.parkhaus.controll.Mqtt;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.eclipse.paho.client.mqttv3.*;
 
-public class MqttController {
-    private MqttClient mqtt;
-    private MqttConnector connector;
+public class MqttController implements MqttCallback {
+    private MqttClient client;
 
-    public MqttController() {
-        connector = new MqttConnector();
+    public void doDemo() {
+        try {
+            client = new MqttClient("tcp://cloud.tbz.ch:1883", "McQueen");
+            client.connect();
+            client.setCallback(this);
+            client.subscribe("Lightning");
+            MqttMessage message = new MqttMessage();
+            message.setPayload("geparkt"
+                    .getBytes());
+            client.publish("Lightning", message);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void connectToBroker() throws MqttException {
-        mqtt = connector.getConnection();
-        mqtt.connect();
+    @Override
+    public void connectionLost(Throwable cause) {
+        // TODO Auto-generated method stub
+
     }
 
-    public void closeConnection() throws MqttException {
-        mqtt.disconnect();
-        mqtt.close();
+    @Override
+    public void messageArrived(String topic, MqttMessage message)
+            throws Exception {
+        System.out.println(message);
     }
 
-    public void sendMessage(String topic, String messageString) throws MqttException {
-        MqttMessage message = new MqttMessage(messageString.getBytes());
-        mqtt.publish(topic, message);
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken token) {
+        // TODO Auto-generated method stub
+
     }
+
 }
